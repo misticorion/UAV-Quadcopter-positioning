@@ -141,73 +141,73 @@ def video_feauture(video_path):
 
         g_match = []
         for m,n in matches:
-        if m.distance < 0.7 * n.distance:
+            if m.distance < 0.7 * n.distance:
                 g_match.append(m)
-        if len(g_match)>min_match:
-            src_pts = np.float32([ kps1[m.queryIdx].pt for m in g_match ]).reshape(-1,1,2)
-            dst_pts = np.float32([ kps2[m.trainIdx].pt for m in g_match ]).reshape(-1,1,2)
+            if len(g_match)>min_match:
+                src_pts = np.float32([ kps1[m.queryIdx].pt for m in g_match ]).reshape(-1,1,2)
+                dst_pts = np.float32([ kps2[m.trainIdx].pt for m in g_match ]).reshape(-1,1,2)
 
-            M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-            matchesMask = mask.ravel().tolist()
+                M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+                matchesMask = mask.ravel().tolist()
 
-            h,w = img1.shape
-            print('center prev: '+ str(w/2) + ' : ' + str(h/2))
+                h,w = img1.shape
+                print('center prev: '+ str(w/2) + ' : ' + str(h/2))
 
-            pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-            dst = cv2.perspectiveTransform(pts,M)
+                pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+                dst = cv2.perspectiveTransform(pts,M)
 
-            img2 = cv2.polylines(img2, [np.int32(dst)], True, (0,255,255) , 3, cv2.LINE_AA)
+                img2 = cv2.polylines(img2, [np.int32(dst)], True, (0,255,255) , 3, cv2.LINE_AA)
 
-        else:
-            print("Not enough matches have been found! - %d/%d" % (len(g_match), min_match))
-            matchesMask = None
-        try:
+            else:
+                print("Not enough matches have been found! - %d/%d" % (len(g_match), min_match))
+                matchesMask = None
+            try:
             # draw_params = dict(matchColor = (0,255,255),
             #                    singlePointColor = (0,255,0),
             #                    matchesMask = matchesMask, # only inliers
             #                    flags = 2)
             # region corners
-            cpoints=np.int32(dst)
+                cpoints=np.int32(dst)
             # print(cpoints)
-            a, b,c = cpoints.shape
+                a, b,c = cpoints.shape
 
             # reshape to standard format
-            c_p=cpoints.reshape((b,a,c))
+                c_p=cpoints.reshape((b,a,c))
             # print(c_p)
             # crop matching region
-            wid_ch = c_p[0][2][0] / 2 - w/2
-            heig_ch = c_p[0][2][1] / 2 - h/2
+                wid_ch = c_p[0][2][0] / 2 - w/2
+                heig_ch = c_p[0][2][1] / 2 - h/2
             # matching_region = crop_region(img1, c_p,wid_ch,heig_ch)
-            print('current : ' + str(c_p[0][2][0] / 2) + ' : ' + str(c_p[0][2][1] / 2))
-            print('finc changes - width change : ' + str(c_p[0][2][0] / 2 - w/2) + ' height change : ' + str(c_p[0][2][1] / 2 - h/2) )
-            font = cv2.FONT_HERSHEY_COMPLEX
+                print('current : ' + str(c_p[0][2][0] / 2) + ' : ' + str(c_p[0][2][1] / 2))
+                print('finc changes - width change : ' + str(c_p[0][2][0] / 2 - w/2) + ' height change : ' + str(c_p[0][2][1] / 2 - h/2) )
+                font = cv2.FONT_HERSHEY_COMPLEX
         
-            if wid_ch < -10:
-                x_decision = 'go left'
-            elif wid_ch > 10:
-                x_decision = 'go right'
-            else:
-                x_decision = 'stay'
+                if wid_ch < -10:
+                    x_decision = 'go left'
+                elif wid_ch > 10:
+                    x_decision = 'go right'
+                else:
+                    x_decision = 'stay'
 
-            if heig_ch < -10:
-                h_decision = 'go up'
-            elif heig_ch > 10:
-                h_decision = 'go down'
-            else:
-                h_decision = 'stay'
+                if heig_ch < -10:
+                    h_decision = 'go up'
+                elif heig_ch > 10:
+                    h_decision = 'go down'
+                else:
+                    h_decision = 'stay'
 
-            cv2.putText(img2, x_decision, (120, 60), font, 1.3, (0, 0, 255), 2)
-            cv2.putText(img2, h_decision, (120, 90), font, 1.3, (0, 0, 255), 2)
+                cv2.putText(img2, x_decision, (120, 60), font, 1.3, (0, 0, 255), 2)
+                cv2.putText(img2, h_decision, (120, 90), font, 1.3, (0, 0, 255), 2)
 
             # img3 = cv2.drawMatches(img1, kps1, img2, kps2, g_match, None, **draw_params)
 
-            cv2.imshow('sdad',img2)
+                cv2.imshow('sdad',img2)
             # cv2.imshow('sdaddsd', matching_region)
-            key = cv2.waitKey(1) & 0xFF
-            if key == ord("q"):
-                break
-        except UnboundLocalError :
-            continue
+                key = cv2.waitKey(1) & 0xFF
+                if key == ord("q"):
+                    break
+                except UnboundLocalError :
+                    continue
 
     cap.release()
     cv2.destroyAllWindows()
